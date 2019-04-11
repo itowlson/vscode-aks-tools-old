@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AzureAccount, AzureSession } from './azure-account';
-import { SubscriptionClient, SubscriptionModels, ResourceManagementClient } from 'azure-arm-resource';
+import { SubscriptionClient, ResourceManagementClient } from 'azure-arm-resource';
 
 export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
     onDidChangeTreeData?: vscode.Event<AKSTreeNode | null | undefined> | undefined = undefined;
@@ -17,7 +17,7 @@ export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
 
     getChildren(element?: AKSTreeNode | undefined): vscode.ProviderResult<AKSTreeNode[]> {
         if (!element) {
-            return getRootElements();
+            return subscriptions();
         } else if (element.nodeType === 'subscription') {
             return clusters(element.session, element.subscription);
         } else {
@@ -26,40 +26,30 @@ export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
     }
 }
 
-interface SubscriptionItem {
-    label: string;
-    description: string;
-    session: AzureSession;
-    subscription: SubscriptionModels.Subscription;
-}
-
-async function getRootElements(): Promise<AKSTreeNode[]> {
-    const subs = await subscriptions();
-    if (subs.length > 0) {
-        return subs.map((s) => ({ nodeType: 'subscription', name: s.label, session: s.session, subscription: s.subscription }));
-    }
-    return [{ nodeType: 'error', message: 'Please log in' }];
-}
-
-async function subscriptions(): Promise<SubscriptionItem[]> {
+async function subscriptions(): Promise<AKSTreeNode[]> {
     const azureAccount: AzureAccount = vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account')!.exports;
-    const subscriptionItems = Array.of<SubscriptionItem>();
     if (azureAccount.status === 'LoggedIn') {
         await azureAccount.waitForFilters();
+        const subscriptionItems = Array.of<AKSTreeNode>();
         for (const session of azureAccount.sessions) {
             const subscriptionClient = new SubscriptionClient.SubscriptionClient(session.credentials);
             const subscriptions = await listAll(subscriptionClient.subscriptions, subscriptionClient.subscriptions.list());
             subscriptionItems.push(...subscriptions
                 .filter((s) => azureAccount.filters.some((f) => f.subscription.subscriptionId === s.subscriptionId))
-                .map((s) => ({
-                    label: s.displayName || '',
-                    description: s.subscriptionId || '',
-                    session,
-                    subscription: s
-                })));
+                .map((s) => asSubscriptionTreeNode(session, s)));
         }
+        return subscriptionItems;
     }
-    return subscriptionItems;
+    return [ { nodeType: 'error', message: 'Please log in' } ];
+}
+
+function asSubscriptionTreeNode(session: AzureSession, sub: SubscriptionClient.SubscriptionModels.Subscription): AKSSubscriptionTreeNode {
+    return {
+        nodeType: 'subscription',
+        name: sub.displayName || '',
+        session,
+        subscription: sub
+    };
 }
 
 async function clusters(session: AzureSession, subscription: SubscriptionClient.SubscriptionModels.Subscription): Promise<AKSTreeNode[]> {
@@ -73,7 +63,7 @@ async function clusters(session: AzureSession, subscription: SubscriptionClient.
             resourceGroup: c.id || '<unnamed>'
         }));
     }
-    return [ { nodeType: 'error', message: 'what gives' } ];
+    return [ { nodeType: 'error', message: 'Please log in' } ];
 }
 
 export interface AKSErrorTreeNode {
