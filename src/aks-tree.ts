@@ -59,8 +59,8 @@ async function clusters(session: AzureSession, subscription: SubscriptionClient.
         const aksClusters = await listAll(client.resources, client.resources.list({ filter: "resourceType eq 'Microsoft.ContainerService/managedClusters'" }));
         return aksClusters.map((c) => ({
             nodeType: 'cluster',
-            name: c.name || '<unnamed>',
-            resourceGroup: c.id || '<unnamed>'
+            name: c.name || '',
+            armId: c.id || ''
         }));
     }
     return [ { nodeType: 'error', message: 'Please log in' } ];
@@ -80,7 +80,7 @@ export interface AKSSubscriptionTreeNode {
 
 export interface AKSClusterTreeNode {
     readonly nodeType: 'cluster';
-    readonly resourceGroup: string;
+    readonly armId: string;
     readonly name: string;
 }
 
