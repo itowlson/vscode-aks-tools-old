@@ -11,10 +11,32 @@
         "Other"
     ],
     "activationEvents": [
-        "onView:aks.aksExplorer"
+        "onView:aks.aksExplorer",
+        "onCommand:aks.addToKubeconfig"
     ],
     "main": "./out/extension",
     "contributes": {
+        "commands": [
+            {
+                "command": "aks.addToKubeconfig",
+                "title": "Add to Kubeconfig",
+                "category": "AKS"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "aks.addToKubeconfig",
+                    "when": "view == aks.aksExplorer && viewItem == aks.cluster"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "aks.addToKubeconfig",
+                    "when": "view == aks.aksExplorer && viewItem == aks.cluster"
+                }
+            ]
+        },
         "views": {
             "kubernetesView": [
                 {
@@ -44,6 +66,8 @@
     "dependencies": {
         "ms-rest": "^2.5.0",
         "ms-rest-azure": "^2.6.0",
+        "@azure/arm-containerservice": "^7.0.1",
+        "azure-arm-containerservice": "^7.0.0",
         "azure-arm-resource": "^7.3.0"
     }
 }

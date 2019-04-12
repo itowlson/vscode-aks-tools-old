@@ -11,7 +11,9 @@ export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
         } else if (element.nodeType === 'subscription') {
             return new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.Collapsed);
         } else {
-            return new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.None);
+            const treeItem = new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.None);
+            treeItem.contextValue = "aks.cluster";
+            return treeItem;
         }
     }
 
@@ -60,7 +62,9 @@ async function clusters(session: AzureSession, subscription: SubscriptionClient.
         return aksClusters.map((c) => ({
             nodeType: 'cluster',
             name: c.name || '',
-            armId: c.id || ''
+            armId: c.id || '',
+            session,
+            subscription
         }));
     }
     return [ { nodeType: 'error', message: 'Please log in' } ];
@@ -82,6 +86,8 @@ export interface AKSClusterTreeNode {
     readonly nodeType: 'cluster';
     readonly armId: string;
     readonly name: string;
+    readonly session: AzureSession;
+    readonly subscription: SubscriptionClient.SubscriptionModels.Subscription;
 }
 
 export type AKSTreeNode = AKSClusterTreeNode | AKSSubscriptionTreeNode | AKSErrorTreeNode;
