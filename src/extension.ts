@@ -28,7 +28,8 @@ async function addToKubeconfig(target: AKSClusterTreeNode): Promise<void> {
     try {
         const accessProfile = await client.managedClusters.getAccessProfile(resourceGroupName, name, 'clusterUser');
         const kubeconfig = accessProfile.kubeConfig!.toString();  // TODO: safely
-        mergeToKubeconfig(kubeconfig);
+        await mergeToKubeconfig(kubeconfig);
+        vscode.window.showInformationMessage(`Added ${target.name} to kubeconfig`);  // TODO: handle it being skipped or whatever we do with duplicates
     } catch (e) {
         console.log(e);
     }
