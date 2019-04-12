@@ -64,10 +64,12 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "ms-rest": "^2.5.0",
-        "ms-rest-azure": "^2.6.0",
         "@azure/arm-containerservice": "^7.0.1",
+        "@types/js-yaml": "^3.12.1",
         "azure-arm-containerservice": "^7.0.0",
-        "azure-arm-resource": "^7.3.0"
+        "azure-arm-resource": "^7.3.0",
+        "js-yaml": "^3.13.1",
+        "ms-rest": "^2.5.0",
+        "ms-rest-azure": "^2.6.0"
     }
 }
