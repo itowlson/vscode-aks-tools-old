@@ -17,8 +17,8 @@ export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
         }
     }
 
-    getChildren(element?: AKSTreeNode | undefined): vscode.ProviderResult<AKSTreeNode[]> {
-        if (!element) {
+    getChildren(element?: AKSTreeNode | { nodeType: 'cloud' } | undefined): vscode.ProviderResult<AKSTreeNode[]> {
+        if (!element || element.nodeType === 'cloud') {
             return subscriptions();
         } else if (element.nodeType === 'subscription') {
             return clusters(element.session, element.subscription);

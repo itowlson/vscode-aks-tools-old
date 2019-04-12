@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as k8s from 'vscode-kubernetes-tools-api';
 // import { ContainerServiceClient } from '@azure/arm-containerservice';
 import * as azcs from 'azure-arm-containerservice';  // deprecated, but @azure/arm-containerservice doesn't play nicely with AzureAccount, so...
 import * as fs from 'fs';
@@ -9,11 +10,21 @@ import { AKSTreeProvider, AKSClusterTreeNode } from './aks-tree';
 
 const explorer = new AKSTreeProvider();
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
     const disposables = [
-        vscode.window.registerTreeDataProvider("aks.aksExplorer", explorer),
+        // vscode.window.registerTreeDataProvider("aks.aksExplorer", explorer),
         vscode.commands.registerCommand("aks.addToKubeconfig", addToKubeconfig)
     ];
+
+    const cloudExplorer = await k8s.extension.cloudExplorer.v1;
+    if (cloudExplorer.available) {
+        cloudExplorer.api.registerCloudProvider({
+            cloudName: "Azure",
+            treeDataProvider: explorer
+        });
+    } else {
+        vscode.window.showWarningMessage(cloudExplorer.reason);
+    }
 
     context.subscriptions.push(...disposables);
 }
