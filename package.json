@@ -11,32 +11,10 @@
         "Other"
     ],
     "activationEvents": [
-        "onView:kubernetes.cloudExplorer",
-        "onCommand:aks.addToKubeconfig"
+        "onView:kubernetes.cloudExplorer"
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "aks.addToKubeconfig",
-                "title": "Add to Kubeconfig",
-                "category": "AKS"
-            }
-        ],
-        "menus": {
-            "commandPalette": [
-                {
-                    "command": "aks.addToKubeconfig",
-                    "when": "view == kubernetes.cloudExplorerr && viewItem == aks.cluster"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "aks.addToKubeconfig",
-                    "when": "view == kubernetes.cloudExplorer && viewItem == aks.cluster"
-                }
-            ]
-        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -64,6 +42,6 @@
         "js-yaml": "^3.13.1",
         "ms-rest": "^2.5.0",
         "ms-rest-azure": "^2.6.0",
-        "vscode-kubernetes-tools-api": "file:../vscode-kubernetes-tools-api/vscode-kubernetes-tools-api-0.0.5.tgz"
+        "vscode-kubernetes-tools-api": "file:../vscode-kubernetes-tools-api/vscode-kubernetes-tools-api-0.0.6.tgz"
     }
 }

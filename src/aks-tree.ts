@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as k8s from 'vscode-kubernetes-tools-api';
+
 import { AzureAccount, AzureSession } from './azure-account';
 import { SubscriptionClient, ResourceManagementClient } from 'azure-arm-resource';
 
@@ -12,7 +14,7 @@ export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
             return new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.Collapsed);
         } else {
             const treeItem = new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.None);
-            treeItem.contextValue = "aks.cluster";
+            treeItem.contextValue = `aks.cluster ${k8s.CloudExplorerV1.SHOW_KUBECONFIG_COMMANDS_CONTEXT}`;
             return treeItem;
         }
     }
@@ -59,15 +61,19 @@ async function clusters(session: AzureSession, subscription: SubscriptionClient.
     if (azureAccount.status === 'LoggedIn') {
         const client = new ResourceManagementClient.ResourceManagementClient(session.credentials, subscription.subscriptionId!);
         const aksClusters = await listAll(client.resources, client.resources.list({ filter: "resourceType eq 'Microsoft.ContainerService/managedClusters'" }));
-        return aksClusters.map((c) => ({
-            nodeType: 'cluster',
-            name: c.name || '',
-            armId: c.id || '',
-            session,
-            subscription
-        }));
+        return aksClusters.map((c) => toClusterTreeNode(session, subscription, c));
     }
     return [ { nodeType: 'error', message: 'Please log in' } ];
+}
+
+function toClusterTreeNode(session: AzureSession, subscription: SubscriptionClient.SubscriptionModels.Subscription, c: ResourceManagementClient.ResourceManagementModels.GenericResource): AKSClusterTreeNode {
+    return {
+        nodeType: 'cluster',
+        name: c.name || '',
+        armId: c.id || '',
+        session,
+        subscription
+    };
 }
 
 export interface AKSErrorTreeNode {
