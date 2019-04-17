@@ -1,8 +1,31 @@
 import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import { SubscriptionClient, ResourceManagementClient } from 'azure-arm-resource';
 
 import { AzureAccount, AzureSession } from './azure-account';
-import { SubscriptionClient, ResourceManagementClient } from 'azure-arm-resource';
+import { listAll } from './azure-api-utils';
+
+export interface AKSErrorTreeNode {
+    readonly nodeType: 'error';
+    readonly message: string;
+}
+
+export interface AKSSubscriptionTreeNode {
+    readonly nodeType: 'subscription';
+    readonly name: string;
+    readonly session: AzureSession;
+    readonly subscription: SubscriptionClient.SubscriptionModels.Subscription;
+}
+
+export interface AKSClusterTreeNode {
+    readonly nodeType: 'cluster';
+    readonly armId: string;
+    readonly name: string;
+    readonly session: AzureSession;
+    readonly subscription: SubscriptionClient.SubscriptionModels.Subscription;
+}
+
+export type AKSTreeNode = AKSClusterTreeNode | AKSSubscriptionTreeNode | AKSErrorTreeNode;
 
 export class AKSTreeProvider implements vscode.TreeDataProvider<AKSTreeNode> {
     onDidChangeTreeData?: vscode.Event<AKSTreeNode | null | undefined> | undefined = undefined;
@@ -74,38 +97,4 @@ function toClusterTreeNode(session: AzureSession, subscription: SubscriptionClie
         session,
         subscription
     };
-}
-
-export interface AKSErrorTreeNode {
-    readonly nodeType: 'error';
-    readonly message: string;
-}
-
-export interface AKSSubscriptionTreeNode {
-    readonly nodeType: 'subscription';
-    readonly name: string;
-    readonly session: AzureSession;
-    readonly subscription: SubscriptionClient.SubscriptionModels.Subscription;
-}
-
-export interface AKSClusterTreeNode {
-    readonly nodeType: 'cluster';
-    readonly armId: string;
-    readonly name: string;
-    readonly session: AzureSession;
-    readonly subscription: SubscriptionClient.SubscriptionModels.Subscription;
-}
-
-export type AKSTreeNode = AKSClusterTreeNode | AKSSubscriptionTreeNode | AKSErrorTreeNode;
-
-export interface PartialList<T> extends Array<T> {
-    nextLink?: string;
-}
-
-async function listAll<T>(client: { listNext(nextPageLink: string): Promise<PartialList<T>>; }, first: Promise<PartialList<T>>): Promise<T[]> {
-    const all: T[] = [];
-    for (let list = await first; list.length || list.nextLink; list = list.nextLink ? await client.listNext(list.nextLink) : []) {
-        all.push(...list);
-    }
-    return all;
 }
