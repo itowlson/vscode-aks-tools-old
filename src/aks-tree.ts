@@ -61,8 +61,12 @@ async function subscriptions(): Promise<AKSTreeNode[]> {
         for (const session of azureAccount.sessions) {
             const subscriptionClient = new SubscriptionClient.SubscriptionClient(session.credentials);
             const subscriptions = await listAll(subscriptionClient.subscriptions, subscriptionClient.subscriptions.list());
+            const matchesFilters: (s: SubscriptionClient.SubscriptionModels.Subscription) => boolean =
+                (azureAccount.filters && azureAccount.filters.length > 0) ?
+                    (s) => azureAccount.filters.some((f) => f.subscription.subscriptionId === s.subscriptionId) :
+                    (_) => true;
             subscriptionItems.push(...subscriptions
-                .filter((s) => azureAccount.filters.some((f) => f.subscription.subscriptionId === s.subscriptionId))
+                .filter((s) => matchesFilters(s))
                 .map((s) => asSubscriptionTreeNode(session, s)));
         }
         return subscriptionItems;
