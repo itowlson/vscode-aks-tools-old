@@ -11,29 +11,10 @@
         "Other"
     ],
     "activationEvents": [
-        "onView:kubernetes.cloudExplorer",
-        "onCommand:aks.foo"
+        "onView:kubernetes.cloudExplorer"
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "aks.foo",
-                "title": "Foo Me Up"
-            }
-        ],
-        "menus": {
-            "view/item/context": [
-                {
-                    "command": "aks.foo",
-                    "when": "viewItem =~ /aks\\.cluster/i"
-                },
-                {
-                    "command": "aks.foo",
-                    "when": "viewItem =~ /kubernetes\\.cloudExplorer\\.cloud\\.azure/i"
-                }
-            ]
-        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
