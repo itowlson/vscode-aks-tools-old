@@ -32,7 +32,6 @@
                     "command": "aks.foo",
                     "when": "viewItem =~ /kubernetes\\.cloudExplorer\\.cloud\\.azure/i"
                 }
-
             ]
         }
     },
@@ -62,6 +61,6 @@
         "js-yaml": "^3.13.1",
         "ms-rest": "^2.5.0",
         "ms-rest-azure": "^2.6.0",
-        "vscode-kubernetes-tools-api": "file:../vscode-kubernetes-tools-api/vscode-kubernetes-tools-api-0.0.5.tgz"
+        "vscode-kubernetes-tools-api": "^0.0.5"
     }
 }
